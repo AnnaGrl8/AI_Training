@@ -1,0 +1,310 @@
+================================================================================
+  TEST RESULTS — lab-unity-pong EditMode Tests
+  Generated: 2026-04-09
+  Runner: Unity Test Runner > EditMode tab
+  Status: NOT YET RUN IN UNITY (tests written, pending first compilation)
+================================================================================
+
+HOW TO RUN
+  1. Open the project in Unity
+  2. Wait for compilation (new asmdefs will trigger a full recompile)
+  3. Window > General > Test Runner
+  4. Select EditMode tab
+  5. Click Run All
+
+================================================================================
+INFRASTRUCTURE CREATED
+================================================================================
+
+  Assembly Definitions (new):
+    Assets/PaddleBall/GameSystems.PaddleBall.asmdef
+      Refs: GameSystems.Core, Unity.InputSystem, Unity.TextMeshPro
+    Assets/PaddleBall/Scripts/Editor/GameSystems.PaddleBall.Editor.asmdef
+      Refs: GameSystems.Core, GameSystems.PaddleBall  [Editor only]
+    Assets/Patterns/GameSystems.Patterns.asmdef
+      Refs: GameSystems.Core, GameSystems.PaddleBall, Unity.TextMeshPro
+    Assets/Tests/EditMode/EditModeTests.asmdef
+      Refs: GameSystems.Core, GameSystems.PaddleBall  [Editor only, test]
+
+  Assembly Definition (pre-existing):
+    Assets/Core/GameSystems.Core.asmdef
+      Refs: none
+
+================================================================================
+TEST INVENTORY — 42 tests total
+================================================================================
+
+FILE: ScoreTests.cs (10 tests)
+------------------------------------------------------------------------------
+
+  [Score — pure C#, no Unity dependencies]
+
+  1. Score_InitialValue_IsZero
+     Expected: PASS
+     Asserts: new Score().Value == 0
+
+  2. Score_Increment_IncreasesValueByOne
+     Expected: PASS
+     Asserts: Value == 1 after one IncrementScore()
+
+  3. Score_MultipleIncrements_AccumulatesCorrectly
+     Expected: PASS
+     Asserts: Value == 5 after five IncrementScore()
+
+  4. Score_Reset_SetsValueToZero
+     Expected: PASS
+     Asserts: Value == 0 after IncrementScore() x2 then ResetScore()
+
+  5. Score_ResetThenIncrement_StartsFromZero
+     Expected: PASS
+     Asserts: Value == 1 after increment x3, reset, increment x1
+
+  [ScoreObjectiveSO — SO lifecycle with event channels]
+
+  6. ScoreObjective_BelowTarget_DoesNotComplete
+     Expected: PASS
+     Setup: target=3, score=1
+     Asserts: TargetScoreReached not raised, IsCompleted == false
+
+  7. ScoreObjective_ReachesTarget_RaisesEvent
+     Expected: PASS
+     Setup: target=2, score=2
+     Asserts: TargetScoreReached raised with correct score, IsCompleted == true
+
+  8. ScoreObjective_ExceedsTarget_StillCompletes
+     Expected: PASS
+     Setup: target=2, score=5
+     Asserts: TargetScoreReached raised, IsCompleted == true
+
+  9. ScoreObjective_MultiplePlayersOneWins_RaisesForWinner
+     Expected: PASS
+     Setup: target=3, P1=1, P2=3
+     Asserts: event payload contains P2's score (3)
+
+  10. ScoreObjective_ResetThenCheck_IsNotCompleted
+      Expected: PASS
+      Asserts: IsCompleted true after scoring, false after ResetObjective()
+
+------------------------------------------------------------------------------
+FILE: VictoryDetectionTests.cs (10 tests)
+------------------------------------------------------------------------------
+
+  [ObjectiveManager — IsObjectiveListComplete]
+
+  11. ObjectiveManager_NoObjectives_IsComplete
+      Expected: PASS
+      Edge case: empty list returns true
+
+  12. ObjectiveManager_SingleObjectiveIncomplete_IsNotComplete
+      Expected: PASS
+      Asserts: IsObjectiveListComplete() == false
+
+  13. ObjectiveManager_SingleObjectiveComplete_IsComplete
+      Expected: PASS
+      Asserts: IsObjectiveListComplete() == true after Complete()
+
+  14. ObjectiveManager_MultipleObjectivesPartialComplete_IsNotComplete
+      Expected: PASS
+      Setup: 3 objectives, 2 completed, 1 not
+      Asserts: IsObjectiveListComplete() == false
+
+  15. ObjectiveManager_AllObjectivesComplete_IsComplete
+      Expected: PASS
+      Setup: 2 objectives, both completed
+      Asserts: IsObjectiveListComplete() == true
+
+  [ObjectiveManager — Event Broadcasting]
+
+  16. ObjectiveManager_AllComplete_BroadcastsAllObjectivesCompleted
+      Expected: PASS
+      Asserts: AllObjectivesCompleted event fires when sole objective completes
+
+  17. ObjectiveManager_PartialComplete_DoesNotBroadcast
+      Expected: PASS
+      Setup: 2 objectives, only 1 completed
+      Asserts: AllObjectivesCompleted event does NOT fire
+
+  18. ObjectiveManager_GameStarted_ResetsAllObjectives
+      Expected: PASS
+      Setup: complete both objectives, then raise GameStarted
+      Asserts: both objectives reset to IsCompleted == false
+
+  [Integrated — Score to Victory chain]
+
+  19. Integrated_ScoreReachesTarget_TriggersVictory
+      Expected: PASS
+      Full chain: ScoreListEventChannel -> ScoreObjectiveSO completes
+                  -> ObjectiveCompleted -> ObjectiveManager detects
+                  -> AllObjectivesCompleted fires
+      Asserts: scoreObjective.IsCompleted, manager.IsObjectiveListComplete(),
+               victory event fired
+
+  20. Integrated_ScoreBelowTarget_NoVictory
+      Expected: PASS
+      Setup: target=5, score=2
+      Asserts: objective not completed, victory event not fired
+
+------------------------------------------------------------------------------
+FILE: GameDataTests.cs (22 tests)
+------------------------------------------------------------------------------
+
+  [Default Values — verify serialized field initializers]
+
+  21. DefaultPaddleSpeed_Is80
+      Expected: PASS — field default is 80f
+
+  22. DefaultPaddleDrag_Is10
+      Expected: PASS — field default is 10f
+
+  23. DefaultPaddleMass_Is05
+      Expected: PASS — field default is 0.5f
+
+  24. DefaultBallSpeed_Is200
+      Expected: PASS — field default is 200f
+
+  25. DefaultBallMaxSpeed_Is300
+      Expected: PASS — field default is 300f
+
+  26. DefaultBounceMultiplier_Is11
+      Expected: PASS — field default is 1.1f
+
+  27. DefaultDelay_Is1
+      Expected: PASS — field default is 1f
+
+  [Player Identification — IsPlayer1/IsPlayer2 reference equality]
+
+  28. IsPlayer1_WithPlayer1ID_ReturnsTrue
+      Expected: PASS
+
+  29. IsPlayer1_WithPlayer2ID_ReturnsFalse
+      Expected: PASS
+
+  30. IsPlayer2_WithPlayer2ID_ReturnsTrue
+      Expected: PASS
+
+  31. IsPlayer2_WithPlayer1ID_ReturnsFalse
+      Expected: PASS
+
+  32. IsPlayer1_WithNull_ReturnsFalse
+      Expected: PASS
+      Note: Unity overloads == for UnityEngine.Object; null comparison
+      returns false, does not throw
+
+  33. IsPlayer2_WithNull_ReturnsFalse
+      Expected: PASS — same null handling as above
+
+  34. IsPlayer1_WithUnknownID_ReturnsFalse
+      Expected: PASS — different SO instance is not equal
+
+  35. Player1And2_AreDifferentInstances
+      Expected: PASS
+
+  [Property Exposure]
+
+  36. Player1Property_ReturnsAssignedID
+      Expected: PASS
+
+  37. Player2Property_ReturnsAssignedID
+      Expected: PASS
+
+  38. OptionalSprites_DefaultToNull
+      Expected: PASS — fields marked [Optional], not assigned
+
+  39. LevelLayout_DefaultsToNull
+      Expected: PASS — not assigned in test SetUp
+
+  [Custom Values — overrides and invariants]
+
+  40. CustomPaddleSpeed_ReturnsSetValue
+      Expected: PASS — set to 120f via SerializedObject
+
+  41. CustomBallSpeed_ReturnsSetValue
+      Expected: PASS — set to 350f via SerializedObject
+
+  42. BallMaxSpeed_GreaterThanOrEqualToBallSpeed
+      Expected: PASS — defaults: 300 >= 200
+
+  43. BounceMultiplier_IsPositive
+      Expected: PASS — default 1.1 > 0
+
+  44. PaddleMass_IsPositive
+      Expected: PASS — default 0.5 > 0
+
+================================================================================
+KNOWN ISSUES — likely to surface on first run
+================================================================================
+
+ISSUE 1: Patterns scripts use UnityEditor without #if guard
+  Severity: COMPILE ERROR
+  Status: FIXED
+  Files:
+    Assets/Patterns/Scripts/AudioSourceController.cs
+    Assets/Patterns/Scripts/UI/ButtonSelectionBinder.cs
+  Fix applied: Wrapped `using UnityEditor` and all editor-only calls
+               (Selection, AssetDatabase) in #if UNITY_EDITOR / #endif blocks
+
+ISSUE 2: Core Editor scripts inside runtime asmdef
+  Severity: PRE-EXISTING — does NOT block tests, but will break player builds
+  Files: 13 scripts under Assets/Core/*/Editor/ folders
+    (EventChannel editors, RuntimeSet editor, SceneBootstrapper, etc.)
+  Cause: GameSystems.Core.asmdef is a runtime assembly. Editor/ subfolder
+         names have no special meaning inside an asmdef. These scripts use
+         UnityEditor types.
+  Note: This was a pre-existing issue before the test infrastructure was
+        added. It only manifests in standalone builds, not in the Editor.
+  Fix: Create Assets/Core/Editor/GameSystems.Core.Editor.asmdef with
+       includePlatforms: ["Editor"] and references to GameSystems.Core.
+       Move all 13 Core Editor scripts under it.
+
+ISSUE 3: GameManager.OnAllObjectivesCompleted calls delegate directly
+  Severity: BUG — NullReferenceException at runtime if no subscribers
+  File: Assets/PaddleBall/Scripts/Managers/GameManager.cs:156
+  Code:   m_GameEnded.OnEventRaised();        // <-- direct delegate call
+  Should: m_GameEnded.RaiseEvent();            // <-- null-safe wrapper
+  Context: EndGame() on line 124 correctly uses RaiseEvent(), but
+           OnAllObjectivesCompleted() on line 156 bypasses it.
+           If m_GameEnded has no subscribers, OnEventRaised is null
+           and this line throws.
+
+ISSUE 4: Double subscription in ScoreObjectiveSO tests
+  Severity: LOW — test noise, not a failure
+  Cause: ScriptableObject.CreateInstance auto-calls OnEnable (which throws
+         because fields are null), then we call OnEnable again via reflection
+         after setting fields. The first OnEnable is suppressed with
+         LogAssert.ignoreFailingMessages. The second OnEnable also calls
+         NullRefChecker.Validate, which may log warnings for non-critical
+         fields. These logs do not cause test failures because
+         ignoreFailingMessages is already reset by then and NullRefChecker
+         uses LogError only for null required fields.
+  Note: If subscription count matters, the first OnEnable's subscription
+        attempt failed (NullRef), so only the second subscription is active.
+
+================================================================================
+ASMDEF DEPENDENCY GRAPH
+================================================================================
+
+  GameSystems.Core                (runtime, all platforms)
+      |
+      +-- GameSystems.PaddleBall  (runtime, all platforms)
+      |       |
+      |       +-- GameSystems.PaddleBall.Editor  (Editor only)
+      |       |
+      |       +-- EditModeTests  (Editor only, test)
+      |
+      +-- GameSystems.Patterns    (runtime, all platforms)
+
+  External refs:
+    PaddleBall  -> Unity.InputSystem, Unity.TextMeshPro
+    Patterns    -> Unity.TextMeshPro
+
+================================================================================
+AFTER FIXING ISSUES — EXPECTED FINAL RESULT
+================================================================================
+
+  42 tests PASSED, 0 FAILED, 0 SKIPPED
+
+  If any test fails unexpectedly, check:
+    - SerializedObject property names match the private field names exactly
+    - Reflection-invoked OnEnable/OnDisable methods found on the correct type
+      (check inheritance — OnEnable on ObjectiveSO vs ScoreObjectiveSO)
+    - LogAssert.ignoreFailingMessages timing around CreateInstance calls

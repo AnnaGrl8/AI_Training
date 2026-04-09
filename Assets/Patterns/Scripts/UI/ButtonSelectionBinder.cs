@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 
 namespace GameSystemsCookbook
@@ -61,6 +63,7 @@ namespace GameSystemsCookbook
                 return;
             }
 
+#if UNITY_EDITOR
             if (!AssetDatabase.Contains(m_ObjectToSelect))
             {
                 // The GameObject is in the Hierarchy
@@ -81,6 +84,7 @@ namespace GameSystemsCookbook
                 // The object is an Asset in the Project
                 Selection.activeObject = m_ObjectToSelect;
             }
+#endif
         }
     }
 }

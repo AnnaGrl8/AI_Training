@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace GameSystemsCookbook
 {
@@ -22,7 +24,7 @@ namespace GameSystemsCookbook
         // Locate the nearest AudioModifer and play the clip.
         public void PlayClosestSource(Vector2 position)
         {
-            AudioModifier closestAudioModifier = null; 
+            AudioModifier closestAudioModifier = null;
             float closestDistance = float.MaxValue;
 
             foreach (AudioModifier audioModifier in m_AudioSources)
@@ -47,7 +49,9 @@ namespace GameSystemsCookbook
         {
             GameObject selectedAudioObject = m_AudioSources[m_CurrentIndex].gameObject;
 
+#if UNITY_EDITOR
             Selection.activeGameObject = selectedAudioObject;
+#endif
             m_CurrentIndex++;
 
             if (m_CurrentIndex >= m_AudioSources.Length)
